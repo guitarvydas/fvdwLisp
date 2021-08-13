@@ -1,0 +1,28 @@
+MC6800AssemblerComments {
+main = newline* line+
+line = codeline | commentline
+commentline = "*" notEOL* newline*
+codeline = nooperandline | othercodeline
+nooperandline = spc+ nooperandopcode newline*
+nooperandopcode = "inca" | "asra"
+othercodeline = label? spc+ opcode operands? lineComment? newline*
+label = ident
+opcode = identOrOperand
+operands = spc+ operand commaSeparatedOperand*
+commaSeparatedOperand = "," operand
+lineComment = spc+ notEOL+
+identOrOperand = operand+
+
+operand = charString | operandChar+
+operandChar = notSpace
+charString = quote notQuote* quote
+newline = "\n"
+notEOL = ~newline any
+ident = identFirst identFollow*
+identFirst = letter
+identFollow = notSpace
+spc = " " | "\t"
+notSpace = ~spc ~newline any
+quote = "'"
+notQuote = ~quote any
+}

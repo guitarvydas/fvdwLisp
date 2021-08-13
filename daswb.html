@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+textarea {
+}
+</style>
+</head>
+<body>
+
+<h1>DaS Transpiler Workbench - MC6800 Assembler</h1>
+
+<p>grok (comments):</p>
+<textarea id="grokcomments" rows="1" cols="90" placeholder="decoder grammar" style="background-color:oldlace;">
+MC6800AssemblerComments {
+main = newline* line+
+line = codeline | commentline
+commentline = "*" notEOL* newline*
+codeline = nooperandline | othercodeline
+nooperandline = spc+ nooperandopcode lineComment? newline*
+nooperandopcode = "inca" | "asra"
+othercodeline = label? spc+ opcode operands? lineComment? newline*
+label = ident
+opcode = identOrOperand
+operands = spc+ operand commaSeparatedOperand*
+commaSeparatedOperand = "," operand
+lineComment = spc+ notEOL+
+identOrOperand = operand+
+
+operand = charString | operandChar+
+operandChar = notSpace
+charString = quote notQuote* quote
+newline = "\n"
+notEOL = ~newline any
+ident = identFirst identFollow*
+identFirst = letter
+identFollow = notSpace
+spc = " " | "\t"
+notSpace = ~spc ~newline any
+quote = "'"
+notQuote = ~quote any
+}
+</textarea>
+
+<p>emit (decoder):</p>
+<textarea id="commentssemantics" rows="1" cols="90" placeholder="decode semantics" style="background-color:oldlace;">
+main [@nl @line] = [[${nl}${line}]]
+line [line] = [[${line}]]
+commentline [asterisk @cs @nl] = [[${asterisk}${cs}${nl}]]
+codeline [line] = [[${line}]]
+nooperandline [@spc opcode @comment @nl] = [[${spc}${opcode}${comment}${nl}]]
+nooperandopcode [opcode] = [[${opcode}]]
+othercodeline [@label @spc opcode @operand @comment @nl] =
+[[${label}${spc}${opcode}${operand}${comment}${nl}]]
+label [ident] = [[${ident}]]
+opcode [x] = [[${x}]]
+operands [@spc op @opnds] = [[${spc}${op}${opnds}]]
+commaSeparatedOperand [comma operand] = [[${comma}${operand}]]
+lineComment [@spc @cs] = [[${spc}${cs}]]
+identOrOperand [@operand] = [[${operand}]]
+
+operand [@cs] = [[${cs}]]
+operandChar [c] = [[${c}]]
+newline [c] = [[${c}]]
+notEOL  [c] = [[${c}]]
+ident [c1 @cfollow] = [[${c1}${cfollow}]]
+identFirst [c] = [[${c}]]
+identFollow [c] = [[${c}]]
+spc [c] = [[${c}]]
+notSpace [c] = [[${c}]]
+quote [c] = [[${c}]]
+notQuote [c] = [[${c}]]
+</textarea>
+
+<p>assembler source</p>
+<textarea id="source" rows="17" cols="90" style="background-color:oldlace;" placeholder="raw source">
+*   #3 PUNCH   WITH A PIA AT $8010 (B)
+NIL   RMB   4      ATOM NIL
+</textarea>
+
+<p>transpiled:</p>
+<textarea id="commentstranspiled" rows="5" cols="90" placeholder="decoded"  readonly style="background-color:whitesmoke;">
+</textarea>
+<br>
+<br>
+<p id="commentsstatus" > READY </p>
+
+
+<!----------------------------------------------------------->
+
+
+
+<br>
+<button onclick="generate ()">Generate</button>
+<script src="../scnwb/ohm.js"></script>
+<script src="../scnwb/glue.js"></script>
+<script src="../scnwb/scope.js"></script>
+<script src="../scnwb/pako/dist/pako_inflate.min.js"></script>
+<script src="support.js"></script>
+<script>
+"use strict"
+
+  function run (grammar, semantics, source, output, status) {
+      let scnGrammar = document.getElementById(grammar).value;
+      let scnSemantics = document.getElementById(semantics).value;
+      let notationSource = document.getElementById(source).value;
+      // glueGrammar and glueSemantics defined in ../scnwb/
+      let generatedSCNSemantics = transpiler (scnSemantics, glueGrammar, "_glue", glueSemantics);
+
+      _ruleInit();
+      try {
+          document.getElementById(status).innerHTML = "FAILED";
+          let semObject = eval('(' + generatedSCNSemantics + ')');
+          document.getElementById (output).value = semObject;
+          let tr = transpiler(notationSource, scnGrammar, "_glue", semObject);
+          document.getElementById(output).value = tr;
+          document.getElementById(status).innerHTML = "OK";
+      }
+       catch (err) {
+          document.getElementById(status).innerHTML = err;
+       }
+  }
+
+
+  
+  function comments () {
+      run ('grokcomments', 'commentssemantics', 'source', 'commentstranspiled', 'commentsstatus');
+  }
+
+  function generate () {
+      comments ();
+  }
+
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,118 @@
+class cell {
+  field car : any
+  field cdr : ref to cell
+}
+
+var atom {
+  field name : ref to cell
+  field property : ref to cell
+}
+
+var nil : int
+var memory : array of cell [57344]
+var stack : array of cell [8192]
+var free : index
+var arg1 : int
+var arg2 : int
+var arg3 : int
+
+procedure coldStart () {
+  nil <- 0
+}
+
+procedure warmStart () {
+}
+
+function ttyin () {
+}
+
+procedure ttyout (x) {
+}
+
+procedure ttyopen () {
+}
+
+procedure abort () {
+}
+
+object
+nil {
+  name : ['NI',*+4] ['L~',nil]
+  name : [[
+  property : [APVAL, FSUBR, FALSE, nil]
+}
+
+oblist {
+  name : ['OB', 'LI', 'ST', nil]
+  property : [APVAL, 0,  
+}
+
+lambda {
+  name : ['LA',*+4] ['MB',*+4] ['DA', nil]
+  property : [APVAL, *+4] [lambda, nil]
+}
+
+subr {
+  name : ['SU',*+4] ['BR',nil]
+  property : [APVAL,*+4] [subr,nil]
+}
+
+fsubr {
+  name : [ 'FS', 'UB', 'R~', nil]
+  property : [ APVAL, fsubr, nil ]
+}
+
+expr {
+  name : ['EX', 'PR', nil]
+  property : [APVAL, expr, nil]
+}
+
+fexpr {
+  name : ['FE', 'XP', 'R~', nil]
+  property : [APVAL, fexpr, nil]
+}
+
+funarg {
+  name : ['FU', 'NA', 'RG', nil]
+  property : [APVAL, funarg, nil]
+}
+
+atom {
+  name : ['AT', 'OM', nil]
+  property : [SUBR, atom, nil]
+}
+
+car {
+  name : ['CA', 'R~', nil]
+  property : [SUBR, CAR, nil
+}
+
+cdr ['CD']['R~']nil
+cons
+eq
+number
+greaterp
+read
+prin1
+rplaca
+rplacd
+eval
+apply
+sassoc
+get
+return
+teread
+plus
+minus
+times
+div
+readch
+read1
+open
+putprop
+quote
+cond
+setq
+alist
+function
+go
